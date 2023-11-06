@@ -1,48 +1,85 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
     <title>PID 模擬器</title>
 </head>
+
 <body>
     <div class="controls">
-        <label>
-            目標值: <input type="range" id="setpoint" min="0" max="40" value="19"> <span id="setpointValue">50</span>
-        </label>
-        <label>
-            Kp: <input type="range" id="Kp" min="0" max="10" step="0.1" value="1"> <span id="KpValue">1</span>
-        </label>
-        <label>
-            Ki: <input type="range" id="Ki" min="0" max="10" step="0.1" value="0.1"> <span id="KiValue">0.1</span>
-        </label>
-        <label>
-            Kd: <input type="range" id="Kd" min="0" max="10" step="0.01" value="0.01"> <span id="KdValue">0.01</span>
-        </label>
-        <label>
-            噪音: <input type="range" id="noise" min="0" max="10" step="0.1" value="0.1"> <span id="noiseValue">0</span>
-        </label>
-        
-        
-        
+        <div>
+            <label>目標值: <input type="range" id="setpoint" min="0" max="40" value="19"> 
+            <span id="setpointValue">50</span></label>
+        </div>
+        <div>
+            <label>Kp: <input type="range" id="Kp" min="0" max="10" step="0.1" value="1"> 
+            <span id="KpValue">1</span></label>
+        </div>
+        <div>
+            <label>Ki: <input type="range" id="Ki" min="0" max="10" step="0.1" value="0.1"> 
+            <span id="KiValue">0.1</span></label>
+        </div>
+        <div>
+            <label>Kd: <input type="range" id="Kd" min="0" max="10" step="0.01" value="0.01"> 
+            <span id="KdValue">0.01</span></label>
+        </div>
+        <div>
+            <label>噪音: <input type="range" id="noise" min="0" max="10" step="0.1" value="0.1"> 
+            <span id="noiseValue">0</span></label>
+        </div>
+
         <button id="resetBtn">重置</button>
-        <label>
-            <input type="checkbox" id="showTarget" checked> 顯示目標值 (紅色)
-        </label>
-        <label>
-            <input type="checkbox" id="showCurrent" checked> 顯示當前值 (藍色)
-        </label>
-        <label>
-            <input type="checkbox" id="showNoise" checked> 顯示噪音值 (橘色)
-        </label>
+
+        <div>
+            <label><input type="checkbox" id="showTarget" checked> 顯示目標值 (紅色)</label>
+        </div>
+        <div>
+            <label><input type="checkbox" id="showCurrent" checked> 顯示當前值 (藍色)</label>
+        </div>
+        <div>
+            <label><input type="checkbox" id="showNoise" checked> 顯示噪音值 (橘色)</label>
+        </div>
+    </div>
+
+    <canvas id="canvas" width="600" height="400"></canvas>
+    <div class="legend">
+        <p><span class="red-color">●</span> 目標值</p>
+        <p><span class="blue-color">●</span> 當前值</p>
+        <p><span class="orange-color">●</span> Noise 影響</p>
+    </div>
+
+    <div class="footer">
+        <a href="https://www.facebook.com/groups/930109078230045" target="_blank">Facebook Ardpilot.Taipei</a>
+        <p>版本：1.0.0</p>
+        <p>更新日期：2023-11-06</p>
         
     </div>
-    <canvas id="canvas" width="600 height="400"></canvas>
-    <p><span class="red-color">●</span> 目標值</p>
-    <p><span class="blue-color">●</span> 當前值</p>
-    <p><span class="orange-color">●</span> Noise 影響</p>
+<!-- PID說明部分 -->
+<div class="pid-description">
+    <h2>PID 工作方式說明:</h2>
+    <p>PID控制器是一種常見的控制器，用於控制工程系統的各種應用。它由三個主要部分組成：比例(P)、積分(I)和微分(D)。</p>
+    <ul>
+        <li><strong>比例(P)</strong>: 這部分考慮目前的誤差。如果誤差很大，控制器輸出也會很大。</li>
+        <li><strong>積分(I)</strong>: 考慮過去的誤差。如果誤差存在已經很長時間，它將累積（積分）誤差，以便控制器可以對其進行修正。</li>
+        <li><strong>微分(D)</strong>: 預測未來的誤差。它查看誤差如何隨著時間變化，並且如果誤差的變化速度迅速增加，控制器輸出將會增加。</li>
+    </ul>
+</div>
 
+<!-- 控制項介紹部分 -->
+<div class="controls-description">
+    <h2>控制項介紹:</h2>
+    <ul>
+        <li><strong>目標值</strong>: 這是你希望系統達到的目標或設定點。例如，如果你正在控制室內溫度，這可能是你希望的溫度。</li>
+        <li><strong>Kp</strong>: 比例增益。決定控制器響應目前誤差的強度。值越大，響應越強烈。</li>
+        <li><strong>Ki</strong>: 積分增益。決定控制器響應過去誤差積累的強度。值越大，響應長時間存在的誤差越強烈。</li>
+        <li><strong>Kd</strong>: 微分增益。決定控制器如何響應誤差的變化速度。值越大，響應誤差變化的速度越快。</li>
+        <li><strong>噪音</strong>: 在實際系統中，經常會有噪音或干擾。這個控制可以模擬這種情況，允許你看到控制器如何在有噪音的情況下響應。</li>
+    </ul>
+</div>
     <script src="script.js"></script>
 </body>
+
 </html>

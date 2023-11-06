@@ -116,18 +116,16 @@ function update() {
 
     const output = Kp * error + Ki * integral + Kd * derivative;
     const noise = (Math.random() * 2 - 1) * noiseAmplitude;
-    currentValue += output;
-
-    // Record the target value with noise
-    const targetWithNoise = targetValue + noise;
     
+    currentValue += output + noise; // Adding noise to the current value
+
     // Ensure values remain within canvas bounds
     currentValue = Math.max(0, Math.min(canvas.height / 4, currentValue));
 
     // Record data
-    targetHistory.push(targetWithNoise);
+    targetHistory.push(targetValue); // Saving original target value
     values.push(currentValue);
-    noiseHistory.push(currentValue + noise);
+    noiseHistory.push(currentValue + noise);  // This is now redundant, but kept for consistency. You can remove if not needed.
     
     if (values.length > canvas.width / T_WIDTH) {
         values.shift();
@@ -152,6 +150,7 @@ function update() {
     lastError = error;
     requestAnimationFrame(update);
 }
+
 
 
 // Existing event listeners

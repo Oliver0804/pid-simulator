@@ -16,7 +16,40 @@ canvas {
     background-color: #f5f5f5;
 }
 
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
 
+.controls {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.footer {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.legend {
+    margin-top: 10px;
+}
+
+.red-color {
+    color: red;
+}
+
+.blue-color {
+    color: blue;
+}
+
+.orange-color {
+    color: orange;
+}
 
 .controls {
     padding: 10px;
