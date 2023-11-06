@@ -113,8 +113,8 @@ resetBtn.addEventListener('click', reset);
 let lastTime = Date.now();
 let lastTargetValue = targetValue;
 let lastCurrentValue = currentValue;
-const MIN_INTEGRAL = -1000;  // 設定適當的最小值
-const MAX_INTEGRAL = 1000;   // 設定適當的最大值
+const MIN_INTEGRAL = 5;  // 設定適當的最小值
+const MAX_INTEGRAL = 95;   // 設定適當的最大值
 
 function update() {
     const currentTime = Date.now();
