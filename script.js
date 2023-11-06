@@ -52,13 +52,14 @@ function reset() {
     integral = 0;
     time = 0;
     history.length = 0;
-    setpoint.value = "50";
-    KpInput.value = "1";
-    KiInput.value = "0.1";
-    KdInput.value = "0.01";
-    Kp = 1;
-    Ki = 0.1;
+    Kp = 0.6;
+    Ki = 0.06;
     Kd = 0.01;
+    setpoint.value = targetValue;
+    KpInput.value = Kp;
+    KiInput.value = Ki;
+    KdInput.value = Kd;
+
 }
 function drawCurrentValues() {
     ctx.beginPath();
@@ -109,14 +110,25 @@ function drawAxes() {
 }
 
 resetBtn.addEventListener('click', reset);
+let lastTime = Date.now();
+let lastTargetValue = targetValue;
+let lastCurrentValue = currentValue;
+const MIN_INTEGRAL = -1000;  // 設定適當的最小值
+const MAX_INTEGRAL = 1000;   // 設定適當的最大值
+
 function update() {
+    const currentTime = Date.now();
+    const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
+
     const error = targetValue - currentValue;
-    integral += error;
-    const derivative = error - lastError;
+    integral += error * deltaTime; // Use deltaTime for more accurate integral
+    integral = Math.max(MIN_INTEGRAL, Math.min(MAX_INTEGRAL, integral)); // Anti-windup
+
+    const derivative = (error - lastError) / deltaTime; // More accurate derivative
 
     const output = Kp * error + Ki * integral + Kd * derivative;
     const noise = (Math.random() * 2 - 1) * noiseAmplitude;
-    
+
     currentValue += output + noise; // Adding noise to the current value
 
     // Ensure values remain within canvas bounds
@@ -125,8 +137,8 @@ function update() {
     // Record data
     targetHistory.push(targetValue); // Saving original target value
     values.push(currentValue);
-    noiseHistory.push(currentValue + noise);  // This is now redundant, but kept for consistency. You can remove if not needed.
-    
+    noiseHistory.push(currentValue + noise);  // This is now redundant, but kept for consistency.
+
     if (values.length > canvas.width / T_WIDTH) {
         values.shift();
         targetHistory.shift();
@@ -136,7 +148,9 @@ function update() {
     // Draw
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawAxes();
-    
+    //console.log(values);
+    //console.log(noiseHistory);
+
     if (document.getElementById('showTarget').checked) {
         drawLine(targetHistory, "red");
     }
@@ -148,6 +162,10 @@ function update() {
     }
 
     lastError = error;
+    lastTime = currentTime;
+    lastTargetValue = targetValue;
+    lastCurrentValue = currentValue;
+
     requestAnimationFrame(update);
 }
 
@@ -188,6 +206,9 @@ noiseInput.addEventListener('input', () => {
         Kd = parseFloat(KdInput.value);
     });
 });
+window.onload = function() {
+    reset();
+};
 
 setpoint.addEventListener('input', () => {
     targetValue = parseFloat(setpoint.value);
