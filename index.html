@@ -27,10 +27,21 @@
         
         
         <button id="resetBtn">重置</button>
+        <label>
+            <input type="checkbox" id="showTarget" checked> 顯示目標值 (紅色)
+        </label>
+        <label>
+            <input type="checkbox" id="showCurrent" checked> 顯示當前值 (藍色)
+        </label>
+        <label>
+            <input type="checkbox" id="showNoise" checked> 顯示噪音值 (橘色)
+        </label>
+        
     </div>
     <canvas id="canvas" width="600 height="400"></canvas>
     <p><span class="red-color">●</span> 目標值</p>
     <p><span class="blue-color">●</span> 當前值</p>
+    <p><span class="orange-color">●</span> Noise 影響</p>
 
     <script src="script.js"></script>
 </body>

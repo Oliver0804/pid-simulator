@@ -7,7 +7,6 @@ const KdInput = document.getElementById('Kd');
 
 const noiseInput = document.getElementById('noise');
 let noiseAmplitude = parseFloat(noiseInput.value);
-const plotInterval = 2; // 每隔2個像素更新一次資料和繪圖
 
 let currentValue = 50;
 let targetValue = parseFloat(setpoint.value);
@@ -32,7 +31,19 @@ const T_WIDTH = 2; // 這表示每個T的間隔為2像素。您可以根據需�
 
 const resetBtn = document.getElementById('resetBtn');
 
-
+function drawLine(data, color) {
+    if (data.length === 0) return;
+    
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height - data[0] * 4);
+    
+    for (let i = 1; i < data.length; i++) {
+        ctx.lineTo(i * T_WIDTH, canvas.height - data[i] * 4);
+    }
+    
+    ctx.strokeStyle = color;
+    ctx.stroke();
+}
 
 function reset() {
     currentValue = 50;
@@ -98,84 +109,50 @@ function drawAxes() {
 }
 
 resetBtn.addEventListener('click', reset);
-
 function update() {
     const error = targetValue - currentValue;
     integral += error;
     const derivative = error - lastError;
-    
+
     const output = Kp * error + Ki * integral + Kd * derivative;
     const noise = (Math.random() * 2 - 1) * noiseAmplitude;
-    if (time % plotInterval === 0) {
+    currentValue += output;
 
-    // Record noise data
-    noiseHistory.push(noise);
-    if (noiseHistory.length > canvas.width) {
+    // Record the target value with noise
+    const targetWithNoise = targetValue + noise;
+    
+    // Ensure values remain within canvas bounds
+    currentValue = Math.max(0, Math.min(canvas.height / 4, currentValue));
+
+    // Record data
+    targetHistory.push(targetWithNoise);
+    values.push(currentValue);
+    noiseHistory.push(currentValue + noise);
+    
+    if (values.length > canvas.width / T_WIDTH) {
+        values.shift();
+        targetHistory.shift();
         noiseHistory.shift();
     }
 
-    currentValue += output + noise;
-
-    // Ensure currentValue remains within canvas bounds
-    currentValue = Math.max(0, Math.min(canvas.height / 4, currentValue));
-
-    // Store data
-    if (timeStep < canvas.width) {
-        if (values.length <= timeStep) {
-            values.push(currentValue);
-        } else {
-            values[timeStep] = currentValue;
-        }
-        timeStep++;
-    } else {
-        values.shift();
-        values.push(currentValue);
-    }
-    
-    pidOutputs.push(output);
-    if (pidOutputs.length > canvas.width) {
-        pidOutputs.shift();
-    }
-
-    // Record history
-    history.push({ time, targetValue, currentValue });
-    if (history.length > canvas.width) {
-        history.shift();
-    }
-    // Record target data
-    targetHistory.push(targetValue);
-    if (targetHistory.length > canvas.width) {
-        targetHistory.shift();
-    }
-    
-    // Draw everything
+    // Draw
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
     drawAxes();
-    drawCurrentValues();
-
-    // Draw target value curve
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height - targetHistory[0] * 4);
-    for(let i = 1; i < targetHistory.length; i++) {
-        ctx.lineTo(i, canvas.height - targetHistory[i] * 4);
-    }
-    ctx.strokeStyle = "red";
-    ctx.stroke();
     
-    // Draw noise effect
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height - (values[0] + noiseHistory[0]) * 4);
-    for(let i = 1; i < values.length; i++) {
-        ctx.lineTo(i, canvas.height - (values[i] + noiseHistory[i]) * 4);
+    if (document.getElementById('showTarget').checked) {
+        drawLine(targetHistory, "red");
     }
-    ctx.strokeStyle = "orange";
-    ctx.stroke();
+    if (document.getElementById('showCurrent').checked) {
+        drawLine(values, "blue");
     }
+    if (document.getElementById('showNoise').checked) {
+        drawLine(noiseHistory, "orange");
+    }
+
     lastError = error;
-    time = (time + timeIncrement) % canvas.width;
     requestAnimationFrame(update);
 }
+
 
 // Existing event listeners
 setpoint.addEventListener('input', () => {
